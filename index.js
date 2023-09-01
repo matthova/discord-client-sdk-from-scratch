@@ -76,7 +76,26 @@ async function initializeSdk() {
 
     const authorizeReply = await authorizePromise;
     const oauth2Code = authorizeReply.data.code;
-    console.log('Our OAuth2 code', oauth2Code);
+
+    // ⚠️ DO NOT DO THIS IN YOUR WEBSITE - DO THIS ON YOUR SERVER ⚠️
+    // Instead create a server, and make an API request through that server to
+    // retrieve your OAuth token. If you store your OAuth2 Client Secret inside
+    // client (website) code, a bad actor could scrape it and pretend to be
+    // your app
+    const DONT_DO_THIS_OAUTH_CLIENT_SECRET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEF';
+    const response = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: CLIENT_ID,
+          client_secret: DONT_DO_THIS_OAUTH_CLIENT_SECRET,
+          grant_type: 'authorization_code',
+          code: oauth2Code,
+        }),
+      });
+    const { access_token } = await response.json();
 }
 
 initializeSdk();
